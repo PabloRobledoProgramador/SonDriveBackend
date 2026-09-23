@@ -17,5 +17,6 @@ namespace Biblioteca.Modelo
         public Usuario Usuario { get; set; } = null!;
         public ICollection<Puesto> Puestos { get; set; } = new List<Puesto>();
         public ICollection<Viaje> Viajes { get; set; } = new List<Viaje>();
+        public ICollection<Falla> Fallas { get; set; } = new List<Falla>();
     }
 }

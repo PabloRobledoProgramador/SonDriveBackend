@@ -6,15 +6,17 @@ namespace Biblioteca.Modelo
 {
     public class Ocupacion
     {
-        public long Id { get; set; }
-        public long IdViaje { get; set; }
-        public long IdPuesto { get; set; }
-        public long IdPasajero { get; set; }
+        public long Id { get; set; }   
         public bool Estado { get; set; }
 
-        // Relaciones
+        // Relaciones N:1
+        public long IdViaje { get; set; }
         public Viaje Viaje { get; set; } = null!;
+
+        public long IdPuesto { get; set; }
         public Puesto Puesto { get; set; } = null!;
+
+        public long IdPasajero { get; set; }
         public Pasajero Pasajero { get; set; } = null!;
     }
 }

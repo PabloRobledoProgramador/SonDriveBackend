@@ -7,15 +7,19 @@ namespace Biblioteca.Modelo
     public class Puesto
     {
         public long Id { get; set; }
-        public long IdVehiculo { get; set; }
-        public long IdCodigo { get; set; }
-        public long IdTipo { get; set; }
+        
 
-        // Relaciones
+        // Relaciones N:1
+        public long IdVehiculo { get; set; }
         public Vehiculo Vehiculo { get; set; } = null!;
+
+        public long IdCodigo { get; set; }
         public CodigoPuesto CodigoPuesto { get; set; } = null!;
+        
+        public long IdTipo { get; set; }
         public TipoPuesto TipoPuesto { get; set; } = null!;
 
+        // Propiedades
         public ICollection<Ocupacion> Ocupaciones { get; set; } = new List<Ocupacion>();
     }
 }

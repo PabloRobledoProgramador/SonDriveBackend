@@ -9,6 +9,7 @@ namespace Biblioteca.Modelo
         public int Id { get; set; }
         public string ValorHora { get; set; } = string.Empty; 
 
+        // Propiedades
         public ICollection<Viaje> Viajes { get; set; } = new List<Viaje>();
     }
 }

@@ -12,5 +12,7 @@ namespace Biblioteca.Modelo
         // Propiedades
         public ICollection<Viaje> ViajesOrigen { get; set; } = new List<Viaje>();
         public ICollection<Viaje> ViajesDestino { get; set; } = new List<Viaje>();
+        public ICollection<Ruta> RutasComoOrigen { get; set; } = new List<Ruta>();
+        public ICollection<Ruta> RutasComoDestino { get; set; } = new List<Ruta>();
     }
 }
