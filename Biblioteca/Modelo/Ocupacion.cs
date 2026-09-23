@@ -7,8 +7,8 @@ namespace Biblioteca.Modelo
     // Representa un ticket o reserva de un pasajero cuando el conductor ocupa un puesto
     public class Ocupacion
     {
-        public long Id { get; set; }   
-        public bool Estado { get; set; }
+        public long Id { get; set; }
+        public bool Ocupado { get; set; } = true;
 
         // Relaciones N:1
         public long IdViaje { get; set; }

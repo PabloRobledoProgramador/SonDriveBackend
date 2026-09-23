@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO
 {
+    // Usuario registra en el Servidor
     public class ReportarFallaDTO
     {
     }
