@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO
 {
+    // Para los desplegables de horarios
     public class HoraResponseDTO
     {
     }

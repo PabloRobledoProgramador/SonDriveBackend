@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.Modelo
 {
+    // Representa un ticket o reserva de un pasajero cuando el conductor ocupa un puesto
     public class Ocupacion
     {
         public long Id { get; set; }   

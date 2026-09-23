@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.Modelo
 {
+    // Representa un puesto de Cada Vehiculo
     public class Puesto
     {
         public long Id { get; set; }
@@ -20,6 +21,6 @@ namespace Biblioteca.Modelo
         public TipoPuesto TipoPuesto { get; set; } = null!;
 
         // Propiedades
-        public ICollection<Ocupacion> Ocupaciones { get; set; } = new List<Ocupacion>();
+        public ICollection<Ocupacion> Ocupaciones { get; set; } = new HashSet<Ocupacion>();
     }
 }

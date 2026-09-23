@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO
 {
+    // Buscar Viaje en Navegador
     public class BuscarViajeDTO
     {
     }

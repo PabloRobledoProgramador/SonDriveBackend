@@ -5,7 +5,7 @@ using Biblioteca.Interfaz;
 
 namespace Biblioteca.Implementacion
 {
-    public class CodigoPuestoServicio :ICodigoPuesto
+    public class CodigoPuestoServicio : ICodigoPuesto
     {
     }
 }

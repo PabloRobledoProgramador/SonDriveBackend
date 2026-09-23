@@ -4,12 +4,13 @@ using System.Text;
 
 namespace Biblioteca.Modelo
 {
+    // Para el Navegador y para Crear Viajes
     public class Hora
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string ValorHora { get; set; } = string.Empty; 
 
         // Propiedades
-        public ICollection<Viaje> Viajes { get; set; } = new List<Viaje>();
+        public ICollection<Viaje> Viajes { get; set; } = new HashSet<Viaje>();
     }
 }

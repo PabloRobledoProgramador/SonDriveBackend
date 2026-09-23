@@ -4,12 +4,13 @@ using System.Text;
 
 namespace Biblioteca.Modelo
 {
+    // Para la page de Vehiculos
     public class Falla
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         // Relacion N:1
-        public int VehiculoId { get; set; }
+        public long VehiculoId { get; set; }
         public Vehiculo? Vehiculo { get; set; }
 
         // Datos 

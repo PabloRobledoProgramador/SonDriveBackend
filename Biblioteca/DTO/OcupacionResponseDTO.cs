@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO
 {
+    
     public class OcupacionResponseDTO
     {
     }

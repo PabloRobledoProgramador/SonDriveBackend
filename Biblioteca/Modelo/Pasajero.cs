@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.Modelo
 {
+    // Para la ventana emergente de Creacion de Viajes al ocupar puesto
     public class Pasajero
     {
         public long Id { get; set; }
@@ -14,6 +15,6 @@ namespace Biblioteca.Modelo
         public string? Direccion { get; set; }
 
         // Propiedades
-        public ICollection<Ocupacion> Ocupaciones { get; set; } = new List<Ocupacion>();
+        public ICollection<Ocupacion> Ocupaciones { get; set; } = new HashSet<Ocupacion>();
     }
 }

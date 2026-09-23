@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO
 {
+    // Recibe credenciales
     public class LoginDTO
     {
     }

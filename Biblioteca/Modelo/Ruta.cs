@@ -7,13 +7,13 @@ namespace Biblioteca.Modelo
     public class Ruta
     {
         
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         // Relacion N:1
-        public int CiudadOrigenId { get; set; }
+        public long CiudadOrigenId { get; set; }
         public Ciudad? CiudadOrigen { get; set; }
 
-        public int CiudadDestinoId { get; set; }
+        public long CiudadDestinoId { get; set; }
         public Ciudad? CiudadDestino { get; set; }
 
         // Datos 
