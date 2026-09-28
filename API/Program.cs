@@ -1,7 +1,13 @@
+using API.Middleware;
+using API.Validaciones.Usuario;
 using Biblioteca.Conexion;
-using Biblioteca.Implementacion;
+using Biblioteca.Mapeo;
+using Biblioteca.Repositorios.Implementaciones;
+using Biblioteca.Repositorios.Interfaces;
+using Biblioteca.Servicios.Implementaciones;
+using Biblioteca.Servicios.Interfaces;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Biblioteca.Interfaz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,15 +18,26 @@ builder.Services.AddDbContext<Conexion>(options =>
 // 2. Registro de IConexion apuntando al mismo DbContext
 builder.Services.AddScoped<IConexion>(provider => provider.GetRequiredService<Conexion>());
 
+//3. Registro de AutoMapper
+builder.Services.AddAutoMapper(cfg => { }, typeof(UsuarioProfile));
+
+//4. Registro de FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioCrearDtoValidador>();
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioActualizarDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioCambiarClaveDtoValidator>();
+
 // AddScoped para los servicios de la capa de negocio
-builder.Services.AddScoped<ICiudad, CiudadServicio>();
-builder.Services.AddScoped<IHora, HoraServicio>();
-builder.Services.AddScoped<IFalla, FallaServicio>();
-builder.Services.AddScoped<IViaje, ViajeServicio>();
-builder.Services.AddScoped<IVehiculo, VehiculoServicio>();
-builder.Services.AddScoped<IOcupacion, OcupacionServicio>();
-builder.Services.AddScoped<IRuta, RutaServicio>();
-builder.Services.AddScoped<IUsuario, UsuarioServicio>();
+builder.Services.AddScoped<ICiudadServicio, CiudadServicio>();
+builder.Services.AddScoped<IHoraServicio, HoraServicio>();
+builder.Services.AddScoped<IFallaServicio, FallaServicio>();
+builder.Services.AddScoped<IViajeServicio, ViajeServicio>();
+builder.Services.AddScoped<IVehiculoServicio, VehiculoServicio>();
+builder.Services.AddScoped<IOcupacionServicio, OcupacionServicio>();
+builder.Services.AddScoped<IRutaServicio, RutaServicio>();
+builder.Services.AddScoped<IUsuarioServicio, UsuarioServicio>();
+
+//AddScoped para los repositorios
+builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 
 // 3. Configuración de CORS para permitir peticiones desde React (Frontend)
 builder.Services.AddCors(options =>
@@ -43,7 +60,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "SonDrive API v1");
+    });
 }
+
+// Agregar el middleware de manejo de excepciones
+app.UseMiddleware<ManejoExcepcionesMiddleware>();
 
 app.UseHttpsRedirection();
 

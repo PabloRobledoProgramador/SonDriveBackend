@@ -9,7 +9,7 @@ namespace Biblioteca.Modelo
     {
         public long Id { get; set; }
         public DateTime FechaSalida { get; set; }
-        public double Precio { get; set; }
+        public decimal Precio { get; set; }
 
         // Relaciones
         public long CiudadOrigenId { get; set; }
