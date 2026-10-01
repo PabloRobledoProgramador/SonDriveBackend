@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Biblioteca.Modelo;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Biblioteca.Repositorios.Interfaces
 {
-    internal class IciudadRepositorio
+    public interface ICiudadRepositorio
     {
+        Task<IReadOnlyList<Ciudad>> ListarAsync(CancellationToken ct = default);
     }
 }

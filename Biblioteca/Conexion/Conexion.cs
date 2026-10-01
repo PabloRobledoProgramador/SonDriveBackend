@@ -138,6 +138,14 @@ namespace Biblioteca.Conexion
                 e.Property(x => x.Nombre).IsRequired().HasMaxLength(100);
                 e.HasIndex(x => x.Nombre).IsUnique();
 
+                e.HasData(
+                    new Ciudad { Id = 1, Nombre = "Sonsón" },
+                    new Ciudad { Id = 2, Nombre = "La Unión" },
+                    new Ciudad { Id = 3, Nombre = "Rionegro" },
+                    new Ciudad { Id = 4, Nombre = "La Ceja" },
+                    new Ciudad { Id = 5, Nombre = "Medellín" }
+                );
+
                 e.HasMany(x => x.ViajesOrigen)
                  .WithOne(v => v.CiudadOrigen)
                  .HasForeignKey(v => v.CiudadOrigenId)
