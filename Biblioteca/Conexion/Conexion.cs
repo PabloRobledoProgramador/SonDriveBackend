@@ -178,6 +178,13 @@ namespace Biblioteca.Conexion
 
                 // Una sola ruta por par origen-destino
                 e.HasIndex(x => new { x.CiudadOrigenId, x.CiudadDestinoId }).IsUnique();
+
+                e.HasData(
+                    new Ruta { Id = 1, CiudadOrigenId = 1, CiudadDestinoId = 2, DistanciaKm = 37, TiempoEstimado = "45 min", PrecioBase = 12000 },
+                    new Ruta { Id = 2, CiudadOrigenId = 1, CiudadDestinoId = 3, DistanciaKm = 70, TiempoEstimado = "1 h 45 min", PrecioBase = 30000 },
+                    new Ruta { Id = 3, CiudadOrigenId = 1, CiudadDestinoId = 4, DistanciaKm = 65, TiempoEstimado = "1 h 30 min", PrecioBase = 25000 },
+                    new Ruta { Id = 4, CiudadOrigenId = 1, CiudadDestinoId = 5, DistanciaKm = 115, TiempoEstimado = "2 h", PrecioBase = 35000 }
+                );
             });
 
             // ===================== HORA =====================

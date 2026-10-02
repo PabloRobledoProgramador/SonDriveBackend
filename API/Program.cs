@@ -38,6 +38,7 @@ builder.Services.AddScoped<IUsuarioServicio, UsuarioServicio>();
 //AddScoped para los repositorios
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 builder.Services.AddScoped<ICiudadRepositorio, CiudadRepositorio>();
+builder.Services.AddScoped<IRutaRepositorio, RutaRepositorio>();
 
 // 3. Configuración de CORS para permitir peticiones desde React (Frontend)
 builder.Services.AddCors(options =>
