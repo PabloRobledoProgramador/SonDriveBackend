@@ -15,7 +15,6 @@ namespace Biblioteca.Conexion
         DbSet<Ocupacion> Ocupaciones { get; set; }
         DbSet<Ruta> Rutas { get; set; }
         DbSet<Ciudad> Ciudades { get; set; }
-        DbSet<Hora> Horas { get; set; }
         DbSet<Falla> Fallas { get; set; }
 
         // Confirmar Cambios en la BD

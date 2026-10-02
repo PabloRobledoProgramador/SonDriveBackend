@@ -28,7 +28,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<UsuarioCambiarClaveDtoValid
 
 // AddScoped para los servicios de la capa de negocio
 builder.Services.AddScoped<ICiudadServicio, CiudadServicio>();
-builder.Services.AddScoped<IHoraServicio, HoraServicio>();
 builder.Services.AddScoped<IFallaServicio, FallaServicio>();
 builder.Services.AddScoped<IViajeServicio, ViajeServicio>();
 builder.Services.AddScoped<IVehiculoServicio, VehiculoServicio>();

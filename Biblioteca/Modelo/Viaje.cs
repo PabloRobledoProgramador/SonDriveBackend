@@ -18,8 +18,7 @@ namespace Biblioteca.Modelo
         public long CiudadDestinoId { get; set; }
         public Ciudad CiudadDestino { get; set; } = null!;
 
-        public long IdHora { get; set; }
-        public Hora Hora { get; set; } = null!;
+        // Propiedades de Hora eliminadas: FechaSalida ahora contiene fecha y hora
 
         public long IdVehiculo { get; set; }
         public Vehiculo Vehiculo { get; set; } = null!;

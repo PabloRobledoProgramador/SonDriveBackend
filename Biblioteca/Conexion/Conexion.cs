@@ -18,7 +18,6 @@ namespace Biblioteca.Conexion
         public DbSet<Ocupacion> Ocupaciones { get; set; }
         public DbSet<Ruta> Rutas { get; set; }
         public DbSet<Ciudad> Ciudades { get; set; }
-        public DbSet<Hora> Horas { get; set; }
         public DbSet<Falla> Fallas { get; set; }
 
         
@@ -182,18 +181,7 @@ namespace Biblioteca.Conexion
             });
 
             // ===================== HORA =====================
-            modelBuilder.Entity<Hora>(e =>
-            {
-                e.ToTable("Horas");
-                e.HasKey(x => x.Id);
-                e.Property(x => x.ValorHora).IsRequired().HasMaxLength(20);
-                e.HasIndex(x => x.ValorHora).IsUnique();
-
-                e.HasMany(x => x.Viajes)
-                 .WithOne(v => v.Hora)
-                 .HasForeignKey(v => v.IdHora)
-                 .OnDelete(DeleteBehavior.Restrict);
-            });
+            // HORA eliminado: la propiedad FechaSalida de Viaje contiene fecha y hora
 
             // ===================== VIAJE =====================
             modelBuilder.Entity<Viaje>(e =>

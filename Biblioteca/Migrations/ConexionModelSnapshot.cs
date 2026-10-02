@@ -41,6 +41,33 @@ namespace Biblioteca.Migrations
                         .IsUnique();
 
                     b.ToTable("Ciudades", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Nombre = "Sonsón"
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Nombre = "La Unión"
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Nombre = "Rionegro"
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            Nombre = "La Ceja"
+                        },
+                        new
+                        {
+                            Id = 5L,
+                            Nombre = "Medellín"
+                        });
                 });
 
             modelBuilder.Entity("Biblioteca.Modelo.CodigoPuesto", b =>
@@ -96,27 +123,6 @@ namespace Biblioteca.Migrations
                     b.HasIndex("VehiculoId");
 
                     b.ToTable("Fallas", (string)null);
-                });
-
-            modelBuilder.Entity("Biblioteca.Modelo.Hora", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ValorHora")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ValorHora")
-                        .IsUnique();
-
-                    b.ToTable("Horas", (string)null);
                 });
 
             modelBuilder.Entity("Biblioteca.Modelo.Ocupacion", b =>
@@ -376,9 +382,6 @@ namespace Biblioteca.Migrations
                     b.Property<DateTime>("FechaSalida")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("IdHora")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("IdVehiculo")
                         .HasColumnType("bigint");
 
@@ -389,8 +392,6 @@ namespace Biblioteca.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CiudadDestinoId");
-
-                    b.HasIndex("IdHora");
 
                     b.HasIndex("IdVehiculo");
 
@@ -508,12 +509,6 @@ namespace Biblioteca.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Biblioteca.Modelo.Hora", "Hora")
-                        .WithMany("Viajes")
-                        .HasForeignKey("IdHora")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Biblioteca.Modelo.Vehiculo", "Vehiculo")
                         .WithMany("Viajes")
                         .HasForeignKey("IdVehiculo")
@@ -523,8 +518,6 @@ namespace Biblioteca.Migrations
                     b.Navigation("CiudadDestino");
 
                     b.Navigation("CiudadOrigen");
-
-                    b.Navigation("Hora");
 
                     b.Navigation("Vehiculo");
                 });
@@ -543,11 +536,6 @@ namespace Biblioteca.Migrations
             modelBuilder.Entity("Biblioteca.Modelo.CodigoPuesto", b =>
                 {
                     b.Navigation("Puestos");
-                });
-
-            modelBuilder.Entity("Biblioteca.Modelo.Hora", b =>
-                {
-                    b.Navigation("Viajes");
                 });
 
             modelBuilder.Entity("Biblioteca.Modelo.Pasajero", b =>
