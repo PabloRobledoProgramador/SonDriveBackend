@@ -16,6 +16,9 @@ namespace Biblioteca.Conexion
         DbSet<Ruta> Rutas { get; set; }
         DbSet<Ciudad> Ciudades { get; set; }
         DbSet<Falla> Fallas { get; set; }
+        DbSet<Pasajero> Pasajeros { get; set; }
+        DbSet<TipoPuesto> TiposPuesto { get; set; }
+        DbSet<CodigoPuesto> CodigosPuesto { get; set; }
 
         // Confirmar Cambios en la BD
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

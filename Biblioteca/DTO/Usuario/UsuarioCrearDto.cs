@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO.Usuario
 {
+    // Registrarse
     public class UsuarioCrearDto
     {
         public string Nombre { get; set; } = string.Empty;

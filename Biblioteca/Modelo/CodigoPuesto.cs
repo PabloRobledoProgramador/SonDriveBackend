@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Biblioteca.Modelo
 {
-    // CAJUELA, PASILLO, VENTANA. SIRVE PARA VALIDACIONES POSTERIORES
+    
+    // A1, A2, COPILOTO, CONDUCTOR
     public class CodigoPuesto
     {
         public long Id { get; set; }

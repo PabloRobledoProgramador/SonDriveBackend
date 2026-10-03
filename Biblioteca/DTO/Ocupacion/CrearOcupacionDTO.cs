@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Biblioteca.DTO.Ocupacion
 {
-    // Ocupar un puesto al hacer click
+    // Ocupar un puesto al hacer click y poner info del pasajero
     public class CrearOcupacionDTO
     {
     }
