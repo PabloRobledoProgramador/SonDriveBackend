@@ -246,6 +246,44 @@ namespace Biblioteca.Migrations
                         .IsUnique();
 
                     b.ToTable("Rutas", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            CiudadDestinoId = 2L,
+                            CiudadOrigenId = 1L,
+                            DistanciaKm = 37.0,
+                            PrecioBase = 12000m,
+                            TiempoEstimado = "45 min"
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            CiudadDestinoId = 3L,
+                            CiudadOrigenId = 1L,
+                            DistanciaKm = 70.0,
+                            PrecioBase = 30000m,
+                            TiempoEstimado = "1 h 45 min"
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            CiudadDestinoId = 4L,
+                            CiudadOrigenId = 1L,
+                            DistanciaKm = 65.0,
+                            PrecioBase = 25000m,
+                            TiempoEstimado = "1 h 30 min"
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            CiudadDestinoId = 5L,
+                            CiudadOrigenId = 1L,
+                            DistanciaKm = 115.0,
+                            PrecioBase = 35000m,
+                            TiempoEstimado = "2 h"
+                        });
                 });
 
             modelBuilder.Entity("Biblioteca.Modelo.TipoPuesto", b =>
@@ -337,8 +375,14 @@ namespace Biblioteca.Migrations
                         .HasMaxLength(4)
                         .HasColumnType("nvarchar(4)");
 
+                    b.Property<DateTime?>("FechaUltimoServicio")
+                        .HasColumnType("date");
+
                     b.Property<long>("IdUsuario")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Kilometraje")
+                        .HasColumnType("int");
 
                     b.Property<string>("Modelo")
                         .IsRequired()
@@ -354,6 +398,15 @@ namespace Biblioteca.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("VencimientoLicencia")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("VencimientoSoat")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("VencimientoTecnomecanica")
+                        .HasColumnType("date");
 
                     b.HasKey("Id");
 

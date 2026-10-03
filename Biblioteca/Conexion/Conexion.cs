@@ -63,22 +63,24 @@ namespace Biblioteca.Conexion
                 e.Property(x => x.Modelo).IsRequired().HasMaxLength(100);
                 e.Property(x => x.AnnoModelo).IsRequired().HasMaxLength(4);
                 e.Property(x => x.Tipo).IsRequired().HasMaxLength(50);
+                e.Property(x => x.Kilometraje).IsRequired();
+                e.Property(x => x.FechaUltimoServicio).HasColumnType("date");
+                e.Property(x => x.VencimientoSoat).IsRequired().HasColumnType("date");
+                e.Property(x => x.VencimientoTecnomecanica).IsRequired().HasColumnType("date");
+                e.Property(x => x.VencimientoLicencia).IsRequired().HasColumnType("date");
 
                 e.HasIndex(x => x.Placa).IsUnique();
 
-                // Vehiculo -> Puestos (los puestos no existen sin el vehículo)
                 e.HasMany(x => x.Puestos)
                  .WithOne(p => p.Vehiculo)
                  .HasForeignKey(p => p.IdVehiculo)
                  .OnDelete(DeleteBehavior.Cascade);
 
-                // Vehiculo -> Viajes (se conserva el historial)
                 e.HasMany(x => x.Viajes)
                  .WithOne(v => v.Vehiculo)
                  .HasForeignKey(v => v.IdVehiculo)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // Vehiculo -> Fallas
                 e.HasMany(x => x.Fallas)
                  .WithOne(f => f.Vehiculo)
                  .HasForeignKey(f => f.VehiculoId)
