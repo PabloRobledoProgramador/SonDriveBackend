@@ -16,15 +16,18 @@ namespace Biblioteca.Servicios.Implementaciones
         private readonly IVehiculoRepositorio _repositorio;
         private readonly IUsuarioRepositorio _usuarioRepositorio;
         private readonly IMapper _mapper;
+        private readonly IPuestoServicio _puestoServicio;
 
         public VehiculoServicio(
             IVehiculoRepositorio repositorio,
             IUsuarioRepositorio usuarioRepositorio,
-            IMapper mapper)
+            IMapper mapper,
+            IPuestoServicio puestoServicio)
         {
             _repositorio = repositorio;
             _usuarioRepositorio = usuarioRepositorio;
             _mapper = mapper;
+            _puestoServicio = puestoServicio;
         }
 
         public async Task<IEnumerable<VehiculoResponseDTO>> ListarAsync(CancellationToken ct = default)
@@ -57,6 +60,10 @@ namespace Biblioteca.Servicios.Implementaciones
             vehiculo.Placa = placa;
 
             var creado = await _repositorio.CrearAsync(vehiculo, ct);
+
+            // El vehículo es el dueño de sus puestos: se genera el mapa apenas se crea.
+            await _puestoServicio.AsegurarMapaAsync(creado.Id, ct);
+
             return Mapear(await ObtenerOFallarAsync(creado.Id, true, ct));
         }
 

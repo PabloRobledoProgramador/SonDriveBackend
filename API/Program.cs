@@ -34,6 +34,7 @@ builder.Services.AddScoped<IVehiculoServicio, VehiculoServicio>();
 builder.Services.AddScoped<IOcupacionServicio, OcupacionServicio>();
 builder.Services.AddScoped<IRutaServicio, RutaServicio>();
 builder.Services.AddScoped<IUsuarioServicio, UsuarioServicio>();
+builder.Services.AddScoped<IPuestoServicio, PuestoServicio>();
 
 //AddScoped para los repositorios
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
@@ -41,6 +42,9 @@ builder.Services.AddScoped<ICiudadRepositorio, CiudadRepositorio>();
 builder.Services.AddScoped<IRutaRepositorio, RutaRepositorio>();
 builder.Services.AddScoped<IFallaRepositorio, FallaRepositorio>();
 builder.Services.AddScoped<IVehiculoRepositorio, VehiculoRepositorio>();
+builder.Services.AddScoped<IViajeRepositorio, ViajeRepositorio>();
+builder.Services.AddScoped<IPuestoRepositorio, PuestoRepositorio>();
+builder.Services.AddScoped<IOcupacionRepositorio, OcupacionRepositorio>();
 
 
 // 3. Configuración de CORS para permitir peticiones desde React (Frontend)

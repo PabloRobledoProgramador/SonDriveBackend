@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Biblioteca.DTO.Viaje
+﻿namespace Biblioteca.DTO.Viaje
 {
-    // Buscar Viaje en Navegador
     public class BuscarViajeDTO
     {
+        public long? CiudadOrigenId { get; set; }
+        public long? CiudadDestinoId { get; set; }
+        public DateTime? Fecha { get; set; }
+        public TimeSpan? Hora { get; set; }
     }
 }

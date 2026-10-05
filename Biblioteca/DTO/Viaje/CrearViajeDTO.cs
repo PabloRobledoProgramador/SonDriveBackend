@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Biblioteca.DTO.Viaje
+﻿namespace Biblioteca.DTO.Viaje
 {
-    // Crear y Editar Viaje
     public class CrearViajeDTO
     {
+        public long CiudadOrigenId { get; set; }
+        public long CiudadDestinoId { get; set; }
+        public long IdVehiculo { get; set; }
+        public DateTime Fecha { get; set; }
+        public TimeSpan Hora { get; set; }
+        public decimal Precio { get; set; }
     }
 }

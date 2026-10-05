@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Biblioteca.DTO.Viaje
+﻿namespace Biblioteca.DTO.Viaje
 {
-    // Resultado que la API le responde al usuario al navegar
-    public class ViajeResponseDTO
+    public class ViajeResponseDTO : ViajeResumenDTO
     {
+        public string NombreVehiculo { get; set; } = string.Empty;
+        public string Placa { get; set; } = string.Empty;
+        public string TelefonoConductor { get; set; } = string.Empty;
+        public List<PuestoViajeDTO> Puestos { get; set; } = new();
     }
 }
