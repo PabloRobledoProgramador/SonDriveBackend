@@ -1,11 +1,10 @@
 ﻿using Biblioteca.DTO.Usuario;
-using Biblioteca.DTO;
 using Biblioteca.Servicios.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TuApi.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
