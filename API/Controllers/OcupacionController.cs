@@ -37,6 +37,18 @@ namespace API.Controllers
             return Ok(ocupacion);
         }
 
+        // Edita los datos del pasajero sin liberar el puesto.
+        [HttpPut("puesto/{idPuesto:long}")]
+        public async Task<ActionResult<OcupacionResponseDTO>> ActualizarPasajero(long idViaje, long idPuesto, [FromBody] CrearOcupacionDTO dto, CancellationToken ct)
+        {
+            var validacion = await _validator.ValidateAsync(dto, ct);
+            if (!validacion.IsValid)
+                return ProblemaDeValidacion(validacion);
+
+            var ocupacion = await _servicio.ActualizarPasajeroAsync(idViaje, idPuesto, dto, ct);
+            return Ok(ocupacion);
+        }
+
         [HttpDelete("puesto/{idPuesto:long}")]
         public async Task<IActionResult> Liberar(long idViaje, long idPuesto, CancellationToken ct)
         {

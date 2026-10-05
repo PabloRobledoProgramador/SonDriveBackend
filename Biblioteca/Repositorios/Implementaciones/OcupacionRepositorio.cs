@@ -45,6 +45,13 @@ namespace Biblioteca.Repositorios.Implementaciones
             return ocupacion;
         }
 
+        // Corrige los datos del pasajero sin tocar la ocupación (el puesto sigue ocupado).
+        public async Task ActualizarPasajeroAsync(Pasajero pasajero, CancellationToken ct = default)
+        {
+            _db.Pasajeros.Update(pasajero);
+            await _db.SaveChangesAsync(ct);
+        }
+
         // Libera: borra la ocupación y, si el pasajero no tiene más, también el pasajero.
         public async Task EliminarAsync(long idOcupacion, CancellationToken ct = default)
         {

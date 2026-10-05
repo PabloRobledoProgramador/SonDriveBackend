@@ -29,8 +29,7 @@ namespace Biblioteca.Servicios.Implementaciones
         {
             var viaje = await ObtenerViajeOFallarAsync(idViaje, ct);
 
-            if (viaje.FechaSalida <= DateTime.Now)
-                throw new ReglaNegocioException("El viaje ya salió; no se pueden modificar sus puestos.");
+            ValidarViajeNoSalio(viaje);
 
             var puesto = viaje.Vehiculo.Puestos.FirstOrDefault(p => p.Id == idPuesto)
                 ?? throw new NoEncontradoException($"El puesto {idPuesto} no pertenece al vehículo de este viaje.");
@@ -41,17 +40,15 @@ namespace Biblioteca.Servicios.Implementaciones
             if (viaje.Ocupaciones.Any(o => o.IdPuesto == idPuesto))
                 throw new ReglaNegocioException("Ese puesto ya está ocupado en este viaje.");
 
+            var pasajero = new Pasajero();
+            AplicarDatos(pasajero, dto);
+
             var ocupacion = new Ocupacion
             {
                 IdViaje = idViaje,
                 IdPuesto = idPuesto,
                 Ocupado = true,
-                Pasajero = new Pasajero
-                {
-                    NombreCompleto = dto.NombreCompleto.Trim(),
-                    Celular = dto.Celular.Trim(),
-                    Direccion = string.IsNullOrWhiteSpace(dto.Direccion) ? null : dto.Direccion.Trim()
-                }
+                Pasajero = pasajero
             };
 
             try
@@ -69,9 +66,23 @@ namespace Biblioteca.Servicios.Implementaciones
             return AResponse(creada);
         }
 
+        // Corrige los datos del pasajero sin liberar el puesto.
+        public async Task<OcupacionResponseDTO> ActualizarPasajeroAsync(long idViaje, long idPuesto, CrearOcupacionDTO dto, CancellationToken ct = default)
+        {
+            var ocupacion = await _repositorio.ObtenerAsync(idViaje, idPuesto, ct)
+                ?? throw new NoEncontradoException("Ese puesto no está ocupado en este viaje.");
+
+            AplicarDatos(ocupacion.Pasajero, dto);
+            await _repositorio.ActualizarPasajeroAsync(ocupacion.Pasajero, ct);
+
+            return AResponse(ocupacion);
+        }
+
         public async Task LiberarAsync(long idViaje, long idPuesto, CancellationToken ct = default)
         {
-            await ObtenerViajeOFallarAsync(idViaje, ct);
+            var viaje = await ObtenerViajeOFallarAsync(idViaje, ct);
+
+            ValidarViajeNoSalio(viaje);
 
             var ocupacion = await _repositorio.ObtenerAsync(idViaje, idPuesto, ct)
                 ?? throw new NoEncontradoException("Ese puesto no está ocupado en este viaje.");
@@ -83,6 +94,21 @@ namespace Biblioteca.Servicios.Implementaciones
         {
             return await _viajeRepositorio.ObtenerPorIdAsync(idViaje, true, ct)
                 ?? throw new NoEncontradoException($"No existe el viaje con id {idViaje}.");
+        }
+
+        // Misma regla para ocupar y liberar.
+        private static void ValidarViajeNoSalio(Viaje viaje)
+        {
+            if (viaje.FechaSalida <= DateTime.Now)
+                throw new ReglaNegocioException("El viaje ya salió; no se pueden modificar sus puestos.");
+        }
+
+        // Normalización en un solo lugar: la usan Ocupar y ActualizarPasajero.
+        private static void AplicarDatos(Pasajero pasajero, CrearOcupacionDTO dto)
+        {
+            pasajero.NombreCompleto = dto.NombreCompleto.Trim();
+            pasajero.Celular = dto.Celular.Trim();
+            pasajero.Direccion = string.IsNullOrWhiteSpace(dto.Direccion) ? null : dto.Direccion.Trim();
         }
 
         private static OcupacionResponseDTO AResponse(Ocupacion o)

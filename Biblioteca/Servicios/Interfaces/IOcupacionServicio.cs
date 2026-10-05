@@ -6,6 +6,7 @@ namespace Biblioteca.Servicios.Interfaces
     {
         Task<IEnumerable<OcupacionResponseDTO>> ListarPorViajeAsync(long idViaje, CancellationToken ct = default);
         Task<OcupacionResponseDTO> OcuparAsync(long idViaje, long idPuesto, CrearOcupacionDTO dto, CancellationToken ct = default);
+        Task<OcupacionResponseDTO> ActualizarPasajeroAsync(long idViaje, long idPuesto, CrearOcupacionDTO dto, CancellationToken ct = default);
         Task LiberarAsync(long idViaje, long idPuesto, CancellationToken ct = default);
     }
 }
