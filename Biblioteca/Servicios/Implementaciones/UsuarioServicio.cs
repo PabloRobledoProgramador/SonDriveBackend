@@ -92,6 +92,11 @@ namespace Biblioteca.Servicios.Implementaciones
             await _repositorio.EliminarAsync(id, ct);
         }
 
+        public async Task<bool> ExisteRolAsync(string rol, CancellationToken ct = default)
+        {
+            return await _repositorio.ExisteRolAsync(rol, ct);
+        }
+
         // ---------- Helpers ----------
 
         private async Task<Usuario> ObtenerOFallarAsync(long id, bool incluirVehiculos, CancellationToken ct)

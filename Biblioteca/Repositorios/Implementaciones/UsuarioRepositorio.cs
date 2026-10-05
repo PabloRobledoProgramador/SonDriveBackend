@@ -50,6 +50,11 @@ namespace Biblioteca.Repositorios.Implementaciones
                 ct);
         }
 
+        public async Task<bool> ExisteRolAsync(string rol, CancellationToken ct = default)
+        {
+            return await _db.Usuarios.AnyAsync(u => u.Rol == rol, ct);
+        }
+
         public async Task<Usuario> CrearAsync(Usuario usuario, CancellationToken ct = default)
         {
             _db.Usuarios.Add(usuario);

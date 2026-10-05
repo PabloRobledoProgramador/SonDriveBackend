@@ -9,6 +9,7 @@ namespace Biblioteca.Repositorios.Interfaces
         Task<Usuario?> ObtenerPorIdAsync(long id, bool incluirVehiculos = false, CancellationToken ct = default);
         Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken ct = default);
         Task<bool> ExisteCorreoAsync(string correo, long? excluirId = null, CancellationToken ct = default);
+        Task<bool> ExisteRolAsync(string rol, CancellationToken ct = default);
 
         Task<Usuario> CrearAsync(Usuario usuario, CancellationToken ct = default);
         Task<Usuario> ActualizarAsync(Usuario usuario, CancellationToken ct = default);

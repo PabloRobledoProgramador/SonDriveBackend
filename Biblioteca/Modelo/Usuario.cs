@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Biblioteca.Seguridad;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -14,7 +15,7 @@ namespace Biblioteca.Modelo
         public string Clave { get; set; } = string.Empty;
         public string Celular { get; set; } = string.Empty;
         public bool Estado { get; set; }
-        public string Rol { get; set; } = "Conductor"; // Conductor por defecto
+        public string Rol { get; set; } = Roles.Conductor; // Conductor por defecto
         public string? Foto { get; set; }
 
         public ICollection<Vehiculo> Vehiculos { get; set; } = new HashSet<Vehiculo>();
