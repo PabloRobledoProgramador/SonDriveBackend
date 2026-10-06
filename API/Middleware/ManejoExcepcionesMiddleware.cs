@@ -27,6 +27,10 @@ namespace API.Middleware
             {
                 await Responder(context, StatusCodes.Status409Conflict, "Regla de negocio incumplida", ex.Message);
             }
+            catch (CredencialesInvalidasException ex)
+            {
+                await Responder(context, StatusCodes.Status401Unauthorized, "No autorizado", ex.Message);
+            }
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
             {
                 // El cliente canceló la petición; no hay a quién responder.

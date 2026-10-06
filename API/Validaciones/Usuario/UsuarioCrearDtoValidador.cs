@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
 using Biblioteca.DTO.Usuario;
+using Biblioteca.Seguridad;
 
 namespace API.Validaciones.Usuario
 {
     public class UsuarioCrearDtoValidador : AbstractValidator<UsuarioCrearDto>
     {
-        private static readonly string[] RolesPermitidos = { "Conductor", "Administrador" };
 
         public UsuarioCrearDtoValidador()
         {
@@ -32,9 +32,9 @@ namespace API.Validaciones.Usuario
                 .Matches(@"^3\d{9}$").WithMessage("El celular debe tener 10 dígitos y empezar por 3.");
 
             RuleFor(x => x.Rol)
-                .Must(rol => RolesPermitidos.Contains(rol))
+                .Must(rol => Roles.Todos.Contains(rol))
                 .When(x => !string.IsNullOrWhiteSpace(x.Rol))
-                .WithMessage("El rol debe ser 'Conductor' o 'Administrador'.");
+                .WithMessage($"El rol debe ser '{Roles.Conductor}' o '{Roles.Administrador}'.");
         }
     }
 }

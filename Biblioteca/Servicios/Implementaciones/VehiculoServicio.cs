@@ -3,6 +3,7 @@ using Biblioteca.DTO.Vehiculo;
 using Biblioteca.Excepciones;
 using Biblioteca.Modelo;
 using Biblioteca.Repositorios.Interfaces;
+using Biblioteca.Seguridad;
 using Biblioteca.Servicios.Interfaces;
 
 namespace Biblioteca.Servicios.Implementaciones
@@ -105,7 +106,7 @@ namespace Biblioteca.Servicios.Implementaciones
             var usuario = await _usuarioRepositorio.ObtenerPorIdAsync(idUsuario, false, ct)
                 ?? throw new NoEncontradoException($"No existe el usuario con id {idUsuario}.");
 
-            if (usuario.Rol != "Conductor")
+            if (usuario.Rol != Roles.Conductor)
                 throw new ReglaNegocioException("El usuario seleccionado no tiene rol de conductor.");
 
             if (!usuario.Estado)

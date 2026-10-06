@@ -1,4 +1,5 @@
 using API.Middleware;
+using API.Seguridad;
 using API.Validaciones.Usuario;
 using Biblioteca.Conexion;
 using Biblioteca.Mapeo;
@@ -7,7 +8,10 @@ using Biblioteca.Repositorios.Interfaces;
 using Biblioteca.Servicios.Implementaciones;
 using Biblioteca.Servicios.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +39,7 @@ builder.Services.AddScoped<IOcupacionServicio, OcupacionServicio>();
 builder.Services.AddScoped<IRutaServicio, RutaServicio>();
 builder.Services.AddScoped<IUsuarioServicio, UsuarioServicio>();
 builder.Services.AddScoped<IPuestoServicio, PuestoServicio>();
+builder.Services.AddScoped<IAutenticacionServicio, AutenticacionServicio>();
 
 //AddScoped para los repositorios
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
@@ -46,8 +51,48 @@ builder.Services.AddScoped<IViajeRepositorio, ViajeRepositorio>();
 builder.Services.AddScoped<IPuestoRepositorio, PuestoRepositorio>();
 builder.Services.AddScoped<IOcupacionRepositorio, OcupacionRepositorio>();
 
+// 5. Autenticación con JWT
+var seccionJwt = builder.Configuration.GetSection(ConfiguracionJwt.Seccion);
+var configuracionJwt = seccionJwt.Get<ConfiguracionJwt>() ?? new ConfiguracionJwt();
 
-// 3. Configuración de CORS para permitir peticiones desde React (Frontend)
+if (configuracionJwt.Clave.Length < 32)
+    throw new InvalidOperationException(
+        "Falta configurar 'Jwt:Clave' (mínimo 32 caracteres). En desarrollo está en appsettings.Development.json; " +
+        "en otros ambientes debe venir de una variable de entorno (Jwt__Clave) o de user secrets.");
+
+builder.Services.Configure<ConfiguracionJwt>(seccionJwt);
+builder.Services.AddSingleton<IGeneradorToken, GeneradorTokenJwt>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opciones =>
+    {
+        // Se usan los nombres de claims tal cual vienen en el token ("sub", "rol", ...)
+        opciones.MapInboundClaims = false;
+        opciones.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = configuracionJwt.Emisor,
+            ValidateAudience = true,
+            ValidAudience = configuracionJwt.Audiencia,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1),
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = GeneradorTokenJwt.CrearLlaveFirma(configuracionJwt.Clave),
+            NameClaimType = NombresClaims.Nombre,
+            RoleClaimType = NombresClaims.Rol
+        };
+    });
+
+// 6. Autorización: por defecto TODO endpoint exige un token válido.
+// Los públicos se marcan con [AllowAnonymous] y los restringidos por rol con [Authorize(Roles = ...)].
+builder.Services.AddAuthorization(opciones =>
+{
+    opciones.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+// 7. Configuración de CORS para permitir peticiones desde React (Frontend)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirFrontend", policy =>
@@ -58,16 +103,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 4. Servicios base del contenedor (Controladores y OpenAPI)
+// 8. Servicios base del contenedor (Controladores y OpenAPI)
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(opciones => opciones.AddDocumentTransformer<TransformadorSeguridadOpenApi>());
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
 
     app.UseSwaggerUI(options =>
     {
@@ -83,8 +128,12 @@ app.UseHttpsRedirection();
 // Habilitar la política de CORS
 app.UseCors("PermitirFrontend");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Crea el primer administrador si todavía no existe ninguno
+await app.CrearAdministradorInicialAsync();
 
 app.Run();
