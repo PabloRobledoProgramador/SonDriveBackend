@@ -1,4 +1,5 @@
-﻿using Biblioteca.DTO.Vehiculo;
+﻿using API.Seguridad;
+using Biblioteca.DTO.Vehiculo;
 using Biblioteca.Servicios.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
@@ -29,6 +30,9 @@ namespace API.Controllers
         [HttpGet("usuario/{idUsuario:long}")]
         public async Task<ActionResult<IEnumerable<VehiculoResponseDTO>>> ListarPorUsuario(long idUsuario, CancellationToken ct)
         {
+            if (!User.PuedeAccederAUsuario(idUsuario))
+                return Forbid();
+
             var vehiculos = await _servicio.ListarPorUsuarioAsync(idUsuario, ct);
             return Ok(vehiculos);
         }

@@ -1,4 +1,5 @@
-﻿using Biblioteca.DTO.Viaje;
+﻿using API.Seguridad;
+using Biblioteca.DTO.Viaje;
 using Biblioteca.Servicios.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
@@ -29,6 +30,9 @@ namespace API.Controllers
         [HttpGet("usuario/{idUsuario:long}")]
         public async Task<ActionResult<IEnumerable<ViajeResumenDTO>>> ListarPorUsuario(long idUsuario, CancellationToken ct)
         {
+            if (!User.PuedeAccederAUsuario(idUsuario))
+                return Forbid();
+
             var viajes = await _servicio.ListarPorUsuarioAsync(idUsuario, ct);
             return Ok(viajes);
         }
