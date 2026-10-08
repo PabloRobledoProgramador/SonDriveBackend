@@ -11,6 +11,33 @@ Content-Type: application/json
 
 ###
 
+# 1b. Datos inválidos: 400 ValidationProblemDetails con errores por campo (Correo, Clave)
+POST {{API_HostAddress}}/api/autenticacion/iniciar-sesion
+Content-Type: application/json
+
+{
+  "correo": "no-es-un-correo",
+  "clave": ""
+}
+
+###
+
+# 1c. Clave errada: 401 ProblemDetails con "Correo o clave incorrectos."
+POST {{API_HostAddress}}/api/autenticacion/iniciar-sesion
+Content-Type: application/json
+
+{
+  "correo": "admin@sondrive.com",
+  "clave": "clave-errada"
+}
+
+###
+
+# 1d. Recurso protegido sin token: 401 con cuerpo ProblemDetails (application/problem+json)
+GET {{API_HostAddress}}/api/autenticacion/perfil
+
+###
+
 @token = pegar-aqui-el-token
 
 # 2. Datos del usuario autenticado

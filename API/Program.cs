@@ -92,16 +92,21 @@ builder.Services.AddAuthorization(opciones =>
         .Build();
 });
 
-// 7. Configuración de CORS para permitir peticiones desde React (Frontend)
+// 7. CORS: solo los orígenes del frontend listados en "Cors:Origenes".
+// Lista vacía => ningún origen permitido (falla cerrada).
+var origenesPermitidos = builder.Configuration.GetSection("Cors:Origenes").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(origenesPermitidos)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
+
+// Las respuestas de error sin cuerpo (401/403 del pipeline de autorización) también salen como ProblemDetails
+builder.Services.AddProblemDetails();
 
 // 8. Servicios base del contenedor (Controladores y OpenAPI)
 builder.Services.AddControllers();
@@ -123,6 +128,9 @@ if (app.Environment.IsDevelopment())
 // Agregar el middleware de manejo de excepciones
 app.UseMiddleware<ManejoExcepcionesMiddleware>();
 
+// Genera un ProblemDetails para las respuestas de error que salen sin cuerpo
+app.UseStatusCodePages();
+
 app.UseHttpsRedirection();
 
 // Habilitar la política de CORS
@@ -137,3 +145,6 @@ app.MapControllers();
 await app.CrearAdministradorInicialAsync();
 
 app.Run();
+
+// Permite que las pruebas de integración (WebApplicationFactory<Program>) encuentren el punto de entrada
+public partial class Program;
