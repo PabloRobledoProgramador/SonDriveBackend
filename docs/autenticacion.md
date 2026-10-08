@@ -57,7 +57,7 @@ sequenceDiagram
 2. El servicio busca el usuario por correo (normalizado a minúsculas), verifica la clave contra el hash BCrypt y comprueba que esté activo (`Estado = true`).
 3. Si todo está bien, se genera un token firmado con validez de 8 horas (configurable).
 4. El frontend envía ese token en **cada** petición, en el encabezado `Authorization: Bearer <token>`.
-5. ASP.NET Core valida el token automáticamente. Si es inválido o venció → **401**. Si es válido pero el rol no tiene permiso → **403**.
+5. ASP.NET Core valida el token automáticamente. Si es inválido o venció → **401**. Si es válido pero el rol no tiene permiso → **403**. Ambas respuestas llevan cuerpo **ProblemDetails** (`application/problem+json`, con `status`), igual que el resto de errores de la API: `AddProblemDetails()` + `app.UseStatusCodePages()` en `Program.cs` le dan cuerpo a los errores que el pipeline de autorización devolvía vacíos.
 
 ---
 
@@ -212,6 +212,21 @@ Crear usuarios requiere ser administrador, así que se necesita un primer admini
 - Solo actúa si no hay ningún administrador: no modifica ni sobrescribe usuarios existentes.
 - Si la base de datos no está disponible al arrancar, registra el error en el log y la API sigue funcionando.
 - En producción, configure estos datos con variables de entorno (`AdministradorInicial__Correo`, `AdministradorInicial__Clave`, ...) y cambie la clave después del primer ingreso.
+
+### Sección `Cors`
+
+La política `PermitirFrontend` solo admite los orígenes de `Cors:Origenes` (no se usa `AllowAnyOrigin()`, principio IV de la constitución):
+
+```json
+"Cors": {
+  "Origenes": [ "http://localhost:5173" ]
+}
+```
+
+- `appsettings.Development.json` permite el servidor de desarrollo de Vite (`http://localhost:5173`); `appsettings.json` deja la lista vacía.
+- **Lista vacía = ningún origen permitido**: el navegador bloqueará las respuestas al frontend hasta configurarla.
+- En otros ambientes se configura por variables de entorno (`Cors__Origenes__0=https://sondrive.ejemplo`, `Cors__Origenes__1=...`).
+- No se habilita `AllowCredentials()`: el token viaja en el encabezado `Authorization`, no en cookies.
 
 ---
 
@@ -371,18 +386,16 @@ Los permisos del rol **Conductor** sobre los demás módulos están pendientes d
 
 ## 10. Uso desde el frontend
 
-1. Llamar a `iniciar-sesion` y guardar `token` (y `expiracion`).
-2. Enviar el token en cada petición:
+El frontend (`SonDriveFrontend`) ya implementa este flujo:
 
-   ```js
-   fetch("http://localhost:5064/api/vehiculo", {
-     headers: { Authorization: `Bearer ${token}` }
-   });
-   ```
-
-3. Usar `usuario.rol` de la respuesta para mostrar u ocultar opciones del menú. Esto es solo para la interfaz: **la seguridad real la aplica el backend**.
-4. Si una petición responde **401**, el token venció o es inválido: borrar el token y enviar al usuario a la pantalla de inicio de sesión.
-5. Si responde **403**, el usuario está autenticado pero su rol no tiene permiso.
+1. `features/autenticacion` llama a `iniciar-sesion` y guarda la respuesta completa (`token`, `expiracion`, `usuario`) en `localStorage` bajo la clave `sondrive.sesion`. Solo `features/autenticacion/sesion.ts` lee y escribe esa clave.
+2. `lib/clienteHttp.ts` agrega `Authorization: Bearer <token>` a cada petición mientras la sesión esté vigente, y convierte las respuestas ProblemDetails en mensajes en español.
+3. `usuario.rol` decide qué secciones y botones se muestran (`RutaProtegida`, `MostrarSiRol`). Esto es solo para la interfaz: **la seguridad real la aplica el backend**.
+4. Cierre de la sesión:
+   - Al llegar `expiracion`, se cierra sola; en una sección privada lleva a iniciar sesión y en una pública deja a la persona como visitante, con el aviso "Tu sesión venció. Inicia sesión de nuevo.".
+   - Si una petición (que no sea el inicio de sesión) responde **401**, se borra la sesión y **siempre** se lleva a la pantalla de inicio de sesión, recordando la página en `?volver=`.
+   - Cerrar sesión en una pestaña la cierra también en las demás.
+5. Si responde **403**, el usuario está autenticado pero su rol no tiene permiso: se muestra "No tienes permiso para realizar esta acción.".
 
 ---
 
