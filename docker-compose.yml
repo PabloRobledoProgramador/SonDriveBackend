@@ -1,0 +1,79 @@
+# Entorno local completo de SonDrive: base de datos + API + frontend con un solo comando.
+#
+#   cp .env.example .env      # una sola vez; cada desarrollador pone su propia clave
+#   docker compose up --build
+#
+# Requiere los dos repositorios clonados uno al lado del otro (SonDriveBackend y SonDriveFrontend)
+# o la variable RUTA_FRONTEND en .env. Las credenciales de appsettings*.json NO se usan ni se
+# modifican: la cadena de conexión se reemplaza con variables de entorno.
+name: sondrive
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${SQL_CLAVE_SA:?Falta SQL_CLAVE_SA en .env (copia .env.example como .env)}
+    ports:
+      - "${SQL_PUERTO:-14330}:1433"
+    volumes:
+      - datos-sql:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  # Aplica las migraciones pendientes y termina; la API arranca solo si terminó bien
+  migraciones:
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+      target: migraciones
+    environment:
+      ConnectionStrings__string_conexion: ${CADENA_CONEXION:-Server=db,1433;Database=SonDriveDB;User Id=sa;Password=${SQL_CLAVE_SA};TrustServerCertificate=True}
+      # El bundle ejecuta Program.cs hasta construir el host, que exige una clave JWT; no se usa para nada más
+      Jwt__Clave: clave-solo-para-generar-las-migraciones-sondrive
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+      target: final
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__string_conexion: ${CADENA_CONEXION:-Server=db,1433;Database=SonDriveDB;User Id=sa;Password=${SQL_CLAVE_SA};TrustServerCertificate=True}
+      # El navegador llama a la API desde el puerto publicado del frontend
+      Cors__Origenes__0: http://localhost:${FRONTEND_PUERTO:-5173}
+    ports:
+      - "${API_PUERTO:-5064}:8080"
+    depends_on:
+      migraciones:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ${RUTA_FRONTEND:-../SonDriveFrontend}
+    environment:
+      # El navegador (en el equipo, no en el contenedor) es quien llama a la API
+      VITE_URL_API: http://localhost:${API_PUERTO:-5064}
+      # En Windows/macOS los cambios en carpetas montadas no llegan al contenedor sin sondeo
+      VITE_USAR_SONDEO: "true"
+    ports:
+      - "${FRONTEND_PUERTO:-5173}:5173"
+    volumes:
+      # Código montado: los cambios se ven al instante (recarga en caliente)
+      - ${RUTA_FRONTEND:-../SonDriveFrontend}:/app
+      # node_modules propio del contenedor (Linux), no el del equipo
+      - /app/node_modules
+    depends_on:
+      - api
+
+volumes:
+  datos-sql:

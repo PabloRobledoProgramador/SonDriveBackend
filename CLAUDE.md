@@ -25,6 +25,21 @@ dotnet ef database update --project Biblioteca --startup-project API
 
 `API/API.http` has sample requests (add one for every new or changed endpoint).
 
+### Docker (whole stack with one command)
+
+`docker-compose.yml` (in this repo) starts SQL Server 2022, applies migrations, and runs the API and the frontend dev server. It expects `SonDriveFrontend` cloned next to this repo (override with `RUTA_FRONTEND`).
+
+```bash
+cp .env.example .env        # once; set your own SQL_CLAVE_SA (never committed)
+docker compose up --build   # db :14330, API :5064 (Swagger at /swagger), frontend :5173
+docker compose down         # add -v to also delete the database volume
+```
+
+- Each developer runs their own database container; credentials live only in the local `.env`. The committed `appsettings*.json` (including `string_conexion`) are **not** used for the connection: compose overrides `ConnectionStrings__string_conexion` (or `CADENA_CONEXION` to point at your own SQL Server via `host.docker.internal`).
+- Migrations run in the `migraciones` service: an EF Core bundle built by the `migraciones` stage of `API/Dockerfile` (placed before `final`, so Visual Studio's default target is unchanged). The bundle runs `Program.cs` up to building the host, so it gets a throwaway `Jwt__Clave`.
+- The API runs as `Development` (dev JWT key and `AdministradorInicial` from `appsettings.Development.json`); `Cors__Origenes__0` follows `FRONTEND_PUERTO`.
+- After changing `package.json` in the frontend, rebuild with `docker compose up --build -V` so the container's `node_modules` volume is recreated.
+
 ### Tests
 
 Two xUnit projects, both in the solution; they never touch the local SQL Server, the network or a specific clock value:

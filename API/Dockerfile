@@ -23,6 +23,22 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Esta fase genera el ejecutable de migraciones de EF Core (efbundle). La usa docker-compose.yml
+# para crear o actualizar la base de datos antes de arrancar la API. Va antes de "final" para que
+# "final" siga siendo la fase por defecto.
+FROM build AS migraciones-build
+ARG BUILD_CONFIGURATION=Release
+ENV PATH="${PATH}:/root/.dotnet/tools"
+RUN dotnet tool install --global dotnet-ef --version 10.0.12
+WORKDIR /src
+RUN dotnet ef migrations bundle --project Biblioteca/Biblioteca.csproj --startup-project API/API.csproj \
+    --configuration $BUILD_CONFIGURATION --output /app/efbundle --force
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS migraciones
+WORKDIR /app
+COPY --from=migraciones-build /app/efbundle .
+ENTRYPOINT ["./efbundle"]
+
 # Esta fase se usa en producción o cuando se ejecuta desde VS en modo normal (valor predeterminado cuando no se usa la configuración de depuración)
 FROM base AS final
 WORKDIR /app
