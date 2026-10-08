@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="API.Pruebas/API.Pruebas.csproj" />
   <Project Path="API/API.csproj" Id="19671109-e331-46af-bb10-518c137ef2b5" />
+  <Project Path="Biblioteca.Pruebas/Biblioteca.Pruebas.csproj" />
   <Project Path="Biblioteca/Biblioteca.csproj" Id="82bbb457-362a-49c8-813f-f4fd99bf2448" />
 </Solution>
