@@ -32,9 +32,11 @@ dotnet ef database update --project Biblioteca --startup-project API
 ```bash
 cp .env.example .env        # once; set your own SQL_CLAVE_SA (never committed)
 docker compose up --build   # db :14330, API :5064 (Swagger at /swagger), frontend :5173
-docker compose down         # add -v to also delete the database volume
+docker compose down         # stops everything; the data stays in db/
 ```
 
+- The database files (`.mdf`/`.ldf`, including system databases) live in **`db/`** in this repo (bind mount on `/var/opt/mssql/data`, git- and docker-ignored, like the innovacion-curricular project). Data survives `down`/`up`; delete `db/` to start from an empty database.
+- The `db` healthcheck only passes when every database can actually be opened (`DATABASEPROPERTYEX(name,'Collation')` is NULL while one is still recovering): after a restart `SonDriveDB` recovers a few seconds after `master`, and the migrations would otherwise fail to log in.
 - Each developer runs their own database container; credentials live only in the local `.env`. The committed `appsettings*.json` (including `string_conexion`) are **not** used for the connection: compose overrides `ConnectionStrings__string_conexion` (or `CADENA_CONEXION` to point at your own SQL Server via `host.docker.internal`).
 - Migrations run in the `migraciones` service: an EF Core bundle built by the `migraciones` stage of `API/Dockerfile` (placed before `final`, so Visual Studio's default target is unchanged). The bundle runs `Program.cs` up to building the host, so it gets a throwaway `Jwt__Clave`.
 - The API runs as `Development` (dev JWT key and `AdministradorInicial` from `appsettings.Development.json`); `Cors__Origenes__0` follows `FRONTEND_PUERTO`.

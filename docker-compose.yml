@@ -18,9 +18,14 @@ services:
     ports:
       - "${SQL_PUERTO:-14330}:1433"
     volumes:
-      - datos-sql:/var/opt/mssql
+      # Archivos de la base (.mdf/.ldf, incluidas las bases del sistema) en la carpeta db/ de este
+      # repositorio, ignorada por git: cada desarrollador tiene la suya.
+      - ./db:/var/opt/mssql/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -b -o /dev/null"]
+      # Sana solo cuando todas las bases terminaron de recuperarse: al reiniciar, SonDriveDB arranca
+      # unos segundos después que master (sys.databases ya dice ONLINE, pero aún no se puede abrir;
+      # DATABASEPROPERTYEX devuelve NULL hasta que termina) y las migraciones fallarían al conectarse
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -b -o /dev/null -Q \"IF EXISTS (SELECT 1 FROM sys.databases WHERE DATABASEPROPERTYEX(name, 'Collation') IS NULL) RAISERROR('Bases en recuperación', 16, 1)\""]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -74,6 +79,3 @@ services:
       - /app/node_modules
     depends_on:
       - api
-
-volumes:
-  datos-sql:
