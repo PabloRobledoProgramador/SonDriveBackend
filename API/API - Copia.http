@@ -1,0 +1,48 @@
+@API_HostAddress = http://localhost:5064
+@token = pegar-aqui-el-token
+
+
+
+### 1. Login (copia el token a @token)
+POST {{API_HostAddress}}/api/autenticacion/iniciar-sesion
+Content-Type: application/json
+
+{ "correo": "admin@sondrive.com", "clave": "Admin12345*" }
+
+### 2. Ver ids de ciudades (anota 2 ids distintos, ej. Sonsón y La Ceja)
+GET {{API_HostAddress}}/api/ciudad
+
+### 3. Crear vehículo (idUsuario = tu id; míralo en /api/autenticacion/perfil)
+POST {{API_HostAddress}}/api/vehiculo
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "idUsuario": 1,
+  "placa": "ABC123",
+  "modelo": "Renault Logan",
+  "annoModelo": "2022",
+  "tipo": "Sedán",
+  "kilometraje": 40000,
+  "fechaUltimoServicio": null,
+  "vencimientoSoat": "2027-06-01",
+  "vencimientoTecnomecanica": "2027-06-01",
+  "vencimientoLicencia": "2027-06-01"
+}
+
+### 4. Crear viaje (usa los ids reales de ciudades y de vehículo)
+POST {{API_HostAddress}}/api/viaje
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "ciudadOrigenId": 1,
+  "ciudadDestinoId": 2,
+  "idVehiculo": 1,
+  "fecha": "2026-10-12",
+  "hora": "08:00:00",
+  "precio": 25000
+}
+
+### 5. Probar la búsqueda (es [AllowAnonymous], no necesita token)
+GET {{API_HostAddress}}/api/viaje?ciudadOrigenId=1&ciudadDestinoId=2&fecha=2026-10-12

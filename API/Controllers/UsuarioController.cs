@@ -63,6 +63,25 @@ namespace API.Controllers
             return CreatedAtAction(nameof(ObtenerPorId), new { id = creado.Id }, creado);
         }
 
+        // POST api/usuario/registro: las cuentas públicas siempre se crean como conductores.
+        [AllowAnonymous]
+        [HttpPost("registro")]
+        public async Task<ActionResult<UsuarioDto>> Registrar(
+            [FromBody] UsuarioCrearDto dto,
+            CancellationToken ct)
+        {
+            dto.Rol = Roles.Conductor;
+            dto.Estado = true;
+            dto.Foto = null;
+
+            var validacion = await _validadorCrear.ValidateAsync(dto, ct);
+            if (!validacion.IsValid)
+                return ProblemaDeValidacion(validacion);
+
+            var creado = await _servicio.CrearAsync(dto, ct);
+            return CreatedAtAction(nameof(ObtenerPorId), new { id = creado.Id }, creado);
+        }
+
         // PUT api/usuario/5
         [Authorize(Roles = Roles.Administrador)]
         [HttpPut("{id:long}")]

@@ -106,6 +106,26 @@ Errores posibles:
 
 Devuelve los datos (`UsuarioDto`) del usuario dueño del token. Útil para que el frontend recupere el usuario al recargar la página.
 
+### `POST /api/usuario/registro` (público)
+
+Crea una cuenta activa de conductor sin iniciar sesión. Recibe los campos de `UsuarioCrearDto`:
+
+```json
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "correo": "ana@ejemplo.com",
+  "clave": "una-clave-segura",
+  "celular": "3001234567"
+}
+```
+
+El servidor fuerza `Rol = "Conductor"`, `Estado = true` y `Foto = null`; no acepta que el
+formulario público cree administradores ni cuentas inactivas. Devuelve `201` con `UsuarioDto`
+(sin la clave). Los datos inválidos producen `400` con errores por campo y un correo duplicado
+produce `409`. El endpoint administrativo `POST /api/usuario` conserva su autorización de
+administrador.
+
 ---
 
 ## 4. Contenido del token (claims)
