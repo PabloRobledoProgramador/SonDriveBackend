@@ -1,5 +1,6 @@
 ﻿using Biblioteca.DTO.Ruta;
 using Biblioteca.Servicios.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -16,6 +17,7 @@ namespace API.Controllers
         }
 
         // GET api/ruta
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RutaResponseDTO>>> Listar(CancellationToken ct)
         {

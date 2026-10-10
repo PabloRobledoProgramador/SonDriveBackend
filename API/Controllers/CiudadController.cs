@@ -1,5 +1,6 @@
 ﻿using Biblioteca.DTO.Ciudad;
 using Biblioteca.Servicios.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -15,6 +16,7 @@ namespace API.Controllers
             _servicio = servicio;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CiudadResponseDTO>>> Listar(CancellationToken ct)
         {

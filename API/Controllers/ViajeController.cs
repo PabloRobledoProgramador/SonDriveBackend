@@ -3,6 +3,7 @@ using Biblioteca.DTO.Viaje;
 using Biblioteca.Servicios.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -20,6 +21,7 @@ namespace API.Controllers
             _validator = validator;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ViajeResumenDTO>>> Buscar([FromQuery] BuscarViajeDTO filtro, CancellationToken ct)
         {
