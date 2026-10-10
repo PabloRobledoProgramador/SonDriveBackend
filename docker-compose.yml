@@ -29,7 +29,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 30s
+      # Con db/ montada desde Windows, SQL Server puede tardar más de 6 minutos en recuperar las
+      # bases. Durante start_period los fallos no cuentan y se revisa cada start_interval; queda
+      # sano en cuanto la consulta responde, así que no retrasa a quien arranca rápido.
+      start_period: 10m
+      start_interval: 5s
 
   # Aplica las migraciones pendientes y termina; la API arranca solo si terminó bien
   migraciones:
