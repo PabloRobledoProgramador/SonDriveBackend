@@ -3,6 +3,7 @@ using Biblioteca.DTO.Usuario;
 using Biblioteca.Excepciones;
 using Biblioteca.Modelo;
 using Biblioteca.Repositorios.Interfaces;
+using Biblioteca.Seguridad;
 using Biblioteca.Servicios.Interfaces;
 
 namespace Biblioteca.Servicios.Implementaciones
@@ -56,6 +57,30 @@ namespace Biblioteca.Servicios.Implementaciones
             // Id, Clave y Vehiculos quedan intactos por la configuración del perfil
             _mapper.Map(dto, existente);
             existente.Correo = correo;
+
+            var actualizado = await _repositorio.ActualizarAsync(existente, ct);
+            return _mapper.Map<UsuarioDto>(actualizado);
+        }
+
+        public async Task<UsuarioDto> ActualizarConductorAsync(long id, ConductorActualizarDto dto, CancellationToken ct = default)
+        {
+            var existente = await ObtenerOFallarAsync(id, false, ct);
+
+            if (existente.Rol != Roles.Conductor)
+                throw new ReglaNegocioException("Solo se pueden editar por esta vía las cuentas de conductor.");
+
+            var correo = Normalizar(dto.Correo);
+
+            if (await _repositorio.ExisteCorreoAsync(correo, id, ct))
+                throw new ReglaNegocioException($"Ya existe otro usuario con el correo '{correo}'.");
+
+            // Id, Clave, Estado, Rol y Vehiculos quedan intactos por la configuración del perfil
+            _mapper.Map(dto, existente);
+            existente.Nombre = (dto.Nombre ?? string.Empty).Trim();
+            existente.Apellido = (dto.Apellido ?? string.Empty).Trim();
+            existente.Correo = correo;
+            existente.Celular = (dto.Celular ?? string.Empty).Trim();
+            existente.Foto = string.IsNullOrWhiteSpace(dto.Foto) ? null : dto.Foto.Trim();
 
             var actualizado = await _repositorio.ActualizarAsync(existente, ct);
             return _mapper.Map<UsuarioDto>(actualizado);
