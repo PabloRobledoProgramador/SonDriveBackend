@@ -379,10 +379,13 @@ Para recursos que no son el usuario (por ejemplo un vehículo), el controlador d
 | `GET api/usuario/{id}` | ✅ cualquiera | Solo el suyo | ❌ 401 |
 | `POST api/usuario` (crear) | ✅ | ❌ 403 | ❌ 401 |
 | `PUT api/usuario/{id}` | ✅ | ❌ 403 | ❌ 401 |
+| `PUT api/usuario/{id}/conductor` (datos del conductor) | ✅ | ❌ 403, también sobre su propia cuenta | ❌ 401 |
 | `PUT api/usuario/{id}/clave` | ✅ cualquiera | Solo la suya | ❌ 401 |
 | `PATCH api/usuario/{id}/estado` | ✅ | ❌ 403 | ❌ 401 |
 | `DELETE api/usuario/{id}` | ✅ | ❌ 403 | ❌ 401 |
 | Vehículos, viajes, ocupaciones, fallas, ciudades, rutas | ✅ | ✅ | ❌ 401 |
+
+`PUT api/usuario/{id}/conductor` corrige nombre, apellido, correo, celular y foto de un conductor. No recibe ni cambia el estado, el rol ni la clave, y solo aplica a cuentas de rol **Conductor**: sobre un administrador responde `409`. Es el endpoint que usa el sitio para editar conductores; `PUT api/usuario/{id}` sigue existiendo, pero también cambia estado y rol.
 
 Los permisos del rol **Conductor** sobre los demás módulos están pendientes de definir; por ahora solo necesita estar autenticado. Para restringirlos, aplique los ejemplos de la sección 7.
 

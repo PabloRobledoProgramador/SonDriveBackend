@@ -68,20 +68,23 @@ Key conventions spanning files:
 - **Validation happens in controllers**: controllers inject `IValidator<TDto>`, call `ValidateAsync`, and return a 400 `ValidationProblemDetails` via a private `ProblemaDeValidacion` helper. There is no automatic validation filter.
 - **Every error response is ProblemDetails**: `AddProblemDetails()` + `app.UseStatusCodePages()` give a `application/problem+json` body to responses that would otherwise be empty (the 401/403 from the authorization pipeline).
 - **Errors are signaled with exceptions** from `Biblioteca/Excepciones`: services throw `NoEncontradoException` (→ 404), `ReglaNegocioException` (→ 409) or `CredencialesInvalidasException` (→ 401); `ManejoExcepcionesMiddleware` converts them to ProblemDetails. Anything else becomes a logged 500. Controllers therefore don't try/catch — they just return `Ok`/`CreatedAtAction`/`NoContent`. Services typically use an `ObtenerOFallarAsync` helper that throws `NoEncontradoException`.
-- **Mapping** is mixed: Usuario, Vehiculo and Falla use AutoMapper profiles in `Biblioteca/Mapeo`; Viaje and Ocupacion build DTOs by hand inside the service (`AResumen`/`AResponse`).
+- **Mapping** is mixed: Usuario and Falla use AutoMapper profiles in `Biblioteca/Mapeo`; Viaje, Ocupacion and Ruta build DTOs by hand inside the service (`AResumen`/`AResponse`/`ADto`). Vehiculo does both — AutoMapper for DTO → entity, a hand-written `Mapear` for the response because it computes fields — which the constitution (principle II) forbids within one aggregate; a known deviation, not a pattern to copy.
+- **The clock is read directly** (`DateTime.Now`/`DateTime.Today`) in `ViajeRepositorio` (future-trip filters), `OcupacionServicio`, `VehiculoServicio.Mapear` and the Viaje/Vehiculo/Falla validators; nothing injects `TimeProvider`. Tests for that code must therefore use dates relative to "now" (or introduce the injection first) to stay deterministic.
 - Async methods take a `CancellationToken ct` that controllers pass through from the action.
 - Repositories use `AsNoTracking()` for reads; detail queries use `AsSplitQuery()` with deep `Include`/`ThenInclude` chains.
 
 ### Seat model (Puesto / Ocupacion)
 
-- Seats belong to the **vehicle**, not the trip. `MapaPuestos.Estandar` defines the standard layout (Conductor, Copiloto, Izquierda, Centro, Derecha + trunk slots C1–C4 of type `Cajuela`). `PuestoServicio.AsegurarMapaAsync` lazily creates any missing seats for a vehicle (and the `CodigoPuesto`/`TipoPuesto` lookup rows) when a trip is created/updated.
+- Seats belong to the **vehicle**, not the trip. `MapaPuestos.Estandar` defines the standard layout (Conductor, Copiloto, Izquierda, Centro, Derecha + trunk slots C1–C4 of type `Cajuela`). `PuestoServicio.AsegurarMapaAsync` creates any missing seats for a vehicle (and the `CodigoPuesto`/`TipoPuesto` lookup rows); it runs when the vehicle is created and again when a trip is created/updated, so older vehicles get their map lazily.
 - A trip's seat availability is derived from its `Ocupaciones`: unique index on `(IdViaje, IdPuesto)`. The driver seat is always reported as occupied and cannot be booked; `CuposLibres` excludes driver and trunk slots, `CajuelasLibres` counts trunk slots.
-- Ocupacion endpoints are nested: `api/viaje/{idViaje}/ocupaciones/puesto/{idPuesto}`.
+- Ocupacion endpoints are nested: `api/viaje/{idViaje}/ocupaciones/puesto/{idPuesto}` (POST occupies, PUT edits the passenger without freeing the seat, DELETE frees it). Seats can't be changed once the trip has departed, and a trip can't switch vehicle while it has occupied seats.
+- Seat data is exposed in two tiers: the anonymous `GET api/viaje/{id}` (`ViajeResponseDTO`) lists `Puestos` with only `Ocupado`/`EsConductor` plus the driver's phone; passenger data (`PasajeroOcupacionDTO`: name, phone, address) is returned only by `GET api/viaje/{idViaje}/ocupaciones`, which requires a token. Keep passenger data out of the public DTO.
 
 ### Other domain notes
 
 - `Viaje.FechaSalida` holds date + time combined (the old `Hora` entity was removed); DTOs receive `Fecha` and `Hora` separately and the service combines them. A vehicle can't have two trips at the same `FechaSalida`. Trip searches only return future trips.
-- Cities and routes (Sonsón → La Unión / Rionegro / La Ceja / Medellín) are seeded via `HasData` in `Conexion`.
+- Cities and routes are seeded via `HasData` in `Conexion`; changing them needs a migration. Only the four routes **from** Sonsón (→ La Unión / Rionegro / La Ceja / Medellín) exist — there are no return routes — each with `DistanciaKm`, `TiempoEstimado` (free text) and `PrecioBase`. `CiudadController` and `RutaController` are read-only lists.
+- Vehicles: the plate is normalized (no spaces, upper case) and unique; the owner must be an active `Conductor`; a vehicle with trips can't be deleted. `VehiculoResponseDTO.Estado` (`Crítico`/`Alerta`/`Óptimo`) is derived only from the severity of unresolved `Falla`s, and each document (`Soat`, `Tecnomecanica`, `Licencia`) carries `DiasRestantes`; the frontend combines both in `vehiculos/estadoVehiculo.ts`, so the two "states" are not the same thing. A resolved fault must be reopened (`PATCH api/falla/{id}/resuelta?resuelta=false`) before it can be edited.
 - Passwords are hashed with BCrypt in `UsuarioServicio`.
 
 ### Authentication / authorization (JWT)
@@ -95,3 +98,18 @@ Key conventions spanning files:
 - Swagger UI has an "Authorize" button (Bearer scheme added by `TransformadorSeguridadOpenApi`).
 - Endpoints that take a user id must start with `if (!User.PuedeAccederAUsuario(id)) return Forbid();` (owner or admin only) — see `UsuarioController`, `VehiculoController.ListarPorUsuario`, `ViajeController.ListarPorUsuario`.
 - `docs/autenticacion.md` is the long-form (Spanish) explanation of the auth design; keep it in sync when changing auth behavior.
+- Anonymous endpoints today: `POST api/autenticacion/iniciar-sesion`, `POST api/usuario/registro`, `GET api/viaje` (search), `GET api/viaje/{id}`, `GET api/ciudad`, `GET api/ruta`. `GET api/autenticacion/perfil` returns the current user from the token.
+- Editing a driver: `PUT api/usuario/{id}/conductor` (admin only, `ConductorActualizarDto`: `Nombre`, `Apellido`, `Correo`, `Celular`, `Foto`). The DTO has no `Estado`, `Rol` or `Clave`, so the edit can't change them; the action trims the texts before validating, and `UsuarioServicio.ActualizarConductorAsync` rejects non-`Conductor` accounts and e-mails used by another user (both 409). This is the endpoint the frontend uses — not `PUT api/usuario/{id}`.
+- The photo rule (optional; if present, absolute `http`/`https` URL, max 500) lives in `API/Validaciones/Usuario/ValidacionFoto` and is shared by `UsuarioCrearDtoValidador` and `ConductorActualizarDtoValidador`; keep new user validators on it.
+- Public sign-up: `POST api/usuario/registro` reuses `UsuarioCrearDto` and its validator but forces `Rol = Conductor`, `Estado = true`, `Foto = null` before validating, whatever the body says. `POST api/usuario` (any role) stays admin-only.
+
+### Known gaps against the constitution
+
+Existing deviations — don't copy them and don't "fix" them in passing; raise them, since the resolution is a team decision:
+
+- Public sign-up is allowed by principle IV (constitution v1.5.0: always `Conductor`, never an administrator), and documented in `docs/autenticacion.md`, but it has no sample request in `API/API.http`.
+- `VehiculoController` (except `ListarPorUsuario`), `FallaController`, `OcupacionController` and the `ViajeController` writes have no role or ownership check: any valid token — including a self-registered driver — can manage any vehicle, fault, trip or passenger list. The matrix says vehicles are admin-only and trips/seat sheets are owner-or-admin.
+- `GET api/usuario` is admin-only and returns the full `UsuarioDto`; the public driver directory of the matrix has no endpoint or public DTO yet (`DTO/Conductor/ConductorResponseDTO` exists).
+- `PUT api/usuario/{id}` (`UsuarioActualizarDto`) is risky and unused by the frontend: `Estado` is a non-nullable `bool`, so a body without it disables the user; a `Rol` in the body is applied, so it can turn a driver into an administrator; it works on any user and has no tests. Prefer `PUT api/usuario/{id}/conductor`.
+- Tests exist only for authentication (`AutenticacionServicioPruebas`, `AutenticacionControllerPruebas`, `InicioSesionDtoValidadorPruebas`), sign-up (`UsuarioRegistroControllerPruebas`), driver editing (`UsuarioServicioPruebas` — only `ActualizarConductorAsync` —, `UsuarioConductorControllerPruebas`, `ConductorActualizarDtoValidadorPruebas`), the photo rule of user creation (`UsuarioCrearDtoValidadorPruebas`) and CORS (`CorsPruebas`). Every other service, validator and endpoint is untested; principle X requires adding those tests when a module touches them.
+- SignalR (`DisponibilidadHub`, `INotificadorDisponibilidad`, principle IX) is not built.

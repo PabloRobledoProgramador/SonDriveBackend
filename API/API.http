@@ -51,3 +51,53 @@ GET {{API_HostAddress}}/api/usuario
 Authorization: Bearer {{token}}
 
 ###
+
+# 4. Editar datos de un conductor (solo administradores). Cambia nombre, apellido, correo, celular
+#    y foto; no toca estado, rol ni clave. Usa el id de un conductor de la lista anterior.
+PUT {{API_HostAddress}}/api/usuario/2/conductor
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Carlos",
+  "apellido": "Gómez",
+  "correo": "carlos@sondrive.com",
+  "celular": "3001234567",
+  "foto": null
+}
+
+###
+
+# 4b. Datos inválidos: 400 ValidationProblemDetails con errores por campo (Nombre, Celular, Foto)
+PUT {{API_HostAddress}}/api/usuario/2/conductor
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "",
+  "apellido": "Gómez",
+  "correo": "carlos@sondrive.com",
+  "celular": "123",
+  "foto": "abc"
+}
+
+###
+
+# 5. Crear usuario (solo administradores) con una foto que no es una dirección web:
+#    400 con errores.Foto. La foto es opcional; si se envía debe ser http o https (máx. 500).
+POST {{API_HostAddress}}/api/usuario
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Torres",
+  "correo": "ana@sondrive.com",
+  "clave": "Conductor123*",
+  "celular": "3012345678",
+  "estado": true,
+  "rol": "Conductor",
+  "foto": "abc"
+}
+
+###

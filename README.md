@@ -67,12 +67,16 @@ Al arrancar, la API crea el **administrador inicial** si no existe ninguno:
 |---|---|
 | `admin@sondrive.com` | `Admin12345*` |
 
-Para probar como **Conductor**, créalo desde Swagger:
+Para probar como **Conductor** hay dos caminos:
 
-1. `POST /api/autenticacion/iniciar-sesion` con el administrador y copia el `token`.
-2. Pulsa **Authorize**, pega el token y acepta.
-3. `POST /api/usuario` con `"rol": "Conductor"`.
-4. Para probar una cuenta desactivada: `PATCH /api/usuario/{id}/estado`.
+- **Registro público**: en el sitio, `http://localhost:5173/registrarse` (o `POST /api/usuario/registro`
+  sin token). La cuenta siempre queda como Conductor activo, aunque el cuerpo pida otro rol.
+- **Desde Swagger, como administrador**:
+  1. `POST /api/autenticacion/iniciar-sesion` con el administrador y copia el `token`.
+  2. Pulsa **Authorize**, pega el token y acepta.
+  3. `POST /api/usuario` con `"rol": "Conductor"`.
+
+Para probar una cuenta desactivada: `PATCH /api/usuario/{id}/estado?estado=false` (solo administrador).
 
 ### Comandos del día a día
 
@@ -191,6 +195,11 @@ depurar cada prueba. En **VS Code**: extensión C# Dev Kit, vista *Testing*.
 |---|---|---|
 | `Biblioteca.Pruebas` | `Servicios/AutenticacionServicioPruebas` | Inicio de sesión: credenciales correctas, correo con mayúsculas, correo inexistente, clave errada, usuario desactivado |
 | `API.Pruebas` | `Controladores/AutenticacionControllerPruebas` | `iniciar-sesion` (200/400/401 con Conductor y Administrador) y `perfil` (sin token, token válido, token falso) |
+| `API.Pruebas` | `Controladores/UsuarioRegistroControllerPruebas` | `usuario/registro`: un anónimo crea un Conductor activo y puede iniciar sesión, el rol pedido se ignora (siempre Conductor), errores por campo con datos inválidos, y `POST /api/usuario` sigue exigiendo Administrador |
+| `Biblioteca.Pruebas` | `Servicios/UsuarioServicioPruebas` | Editar datos de un conductor: guarda los cinco datos, usuario inexistente, correo de otro usuario (también con mayúsculas), mismo correo propio, cuenta de administrador rechazada, conserva estado, rol y clave, recorta textos, foto en blanco |
+| `API.Pruebas` | `Controladores/UsuarioConductorControllerPruebas` | `PUT usuario/{id}/conductor`: 200, 400 por campo, 404, 409 (correo repetido y cuenta de administrador), 401 sin token, 403 con Conductor (sobre otro y sobre sí mismo), ignora `estado` y `rol` del cuerpo, recorta antes de validar y la clave anterior sigue sirviendo |
+| `API.Pruebas` | `Validaciones/ConductorActualizarDtoValidadorPruebas` | Reglas y mensajes al editar un conductor (nombre, apellido, correo, celular, foto) |
+| `API.Pruebas` | `Validaciones/UsuarioCrearDtoValidadorPruebas` | Regla de la foto al crear un usuario (dirección `http`/`https`, máximo 500 caracteres) |
 | `API.Pruebas` | `Validaciones/InicioSesionDtoValidadorPruebas` | Mensajes del validador de inicio de sesión |
 | `API.Pruebas` | `Seguridad/CorsPruebas` | Orígenes permitidos y rechazados por CORS |
 
