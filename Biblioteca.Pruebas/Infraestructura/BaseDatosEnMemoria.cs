@@ -49,5 +49,44 @@ public sealed class BaseDatosEnMemoria : IDisposable
         return usuario;
     }
 
+    public async Task<Vehiculo> AgregarVehiculoAsync(long idUsuario, string placa)
+    {
+        var vigencia = DateTime.Today.AddYears(1);
+        var vehiculo = new Vehiculo
+        {
+            IdUsuario = idUsuario,
+            Placa = placa,
+            Modelo = "Kia Rio",
+            AnnoModelo = "2022",
+            Tipo = "Sedan",
+            Kilometraje = 1000,
+            VencimientoSoat = vigencia,
+            VencimientoTecnomecanica = vigencia,
+            VencimientoLicencia = vigencia
+        };
+
+        await using var contexto = CrearConexion();
+        contexto.Vehiculos.Add(vehiculo);
+        await contexto.SaveChangesAsync();
+        return vehiculo;
+    }
+
+    public async Task<Falla> AgregarFallaAsync(long vehiculoId, string severidad, bool estaResuelta)
+    {
+        var falla = new Falla
+        {
+            VehiculoId = vehiculoId,
+            Descripcion = "Falla de prueba",
+            Severidad = severidad,
+            Fecha = DateTime.Today,
+            EstaResuelta = estaResuelta
+        };
+
+        await using var contexto = CrearConexion();
+        contexto.Fallas.Add(falla);
+        await contexto.SaveChangesAsync();
+        return falla;
+    }
+
     public void Dispose() => _conexion.Dispose();
 }

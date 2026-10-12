@@ -17,17 +17,20 @@ namespace API.Controllers
         private readonly IValidator<UsuarioCrearDto> _validadorCrear;
         private readonly IValidator<UsuarioActualizarDto> _validadorActualizar;
         private readonly IValidator<UsuarioCambiarClaveDto> _validadorClave;
+        private readonly IValidator<ConductorActualizarDto> _validadorConductor;
 
         public UsuarioController(
             IUsuarioServicio servicio,
             IValidator<UsuarioCrearDto> validadorCrear,
             IValidator<UsuarioActualizarDto> validadorActualizar,
-            IValidator<UsuarioCambiarClaveDto> validadorClave)
+            IValidator<UsuarioCambiarClaveDto> validadorClave,
+            IValidator<ConductorActualizarDto> validadorConductor)
         {
             _servicio = servicio;
             _validadorCrear = validadorCrear;
             _validadorActualizar = validadorActualizar;
             _validadorClave = validadorClave;
+            _validadorConductor = validadorConductor;
         }
 
         // GET api/usuario
@@ -63,6 +66,25 @@ namespace API.Controllers
             return CreatedAtAction(nameof(ObtenerPorId), new { id = creado.Id }, creado);
         }
 
+        // POST api/usuario/registro: las cuentas públicas siempre se crean como conductores.
+        [AllowAnonymous]
+        [HttpPost("registro")]
+        public async Task<ActionResult<UsuarioDto>> Registrar(
+            [FromBody] UsuarioCrearDto dto,
+            CancellationToken ct)
+        {
+            dto.Rol = Roles.Conductor;
+            dto.Estado = true;
+            dto.Foto = null;
+
+            var validacion = await _validadorCrear.ValidateAsync(dto, ct);
+            if (!validacion.IsValid)
+                return ProblemaDeValidacion(validacion);
+
+            var creado = await _servicio.CrearAsync(dto, ct);
+            return CreatedAtAction(nameof(ObtenerPorId), new { id = creado.Id }, creado);
+        }
+
         // PUT api/usuario/5
         [Authorize(Roles = Roles.Administrador)]
         [HttpPut("{id:long}")]
@@ -73,6 +95,32 @@ namespace API.Controllers
                 return ProblemaDeValidacion(validacion);
 
             var actualizado = await _servicio.ActualizarAsync(id, dto, ct);
+            return Ok(actualizado);
+        }
+
+        // PUT api/usuario/5/conductor: corrige los datos de un conductor sin tocar estado, rol ni clave
+        [Authorize(Roles = Roles.Administrador)]
+        [HttpPut("{id:long}/conductor")]
+        public async Task<ActionResult<UsuarioDto>> ActualizarConductor(
+            long id,
+            [FromBody] ConductorActualizarDto dto,
+            CancellationToken ct)
+        {
+            if (!User.PuedeAccederAUsuario(id))
+                return Forbid();
+
+            // Los espacios sobrantes se descartan antes de validar
+            dto.Nombre = dto.Nombre?.Trim() ?? string.Empty;
+            dto.Apellido = dto.Apellido?.Trim() ?? string.Empty;
+            dto.Correo = dto.Correo?.Trim() ?? string.Empty;
+            dto.Celular = dto.Celular?.Trim() ?? string.Empty;
+            dto.Foto = string.IsNullOrWhiteSpace(dto.Foto) ? null : dto.Foto.Trim();
+
+            var validacion = await _validadorConductor.ValidateAsync(dto, ct);
+            if (!validacion.IsValid)
+                return ProblemaDeValidacion(validacion);
+
+            var actualizado = await _servicio.ActualizarConductorAsync(id, dto, ct);
             return Ok(actualizado);
         }
 

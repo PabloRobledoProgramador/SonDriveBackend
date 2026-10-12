@@ -35,6 +35,11 @@ namespace API.Validaciones.Usuario
                 .Must(rol => Roles.Todos.Contains(rol))
                 .When(x => !string.IsNullOrWhiteSpace(x.Rol))
                 .WithMessage($"El rol debe ser '{Roles.Conductor}' o '{Roles.Administrador}'.");
+
+            RuleFor(x => x.Foto)
+                .Must(ValidacionFoto.EsDireccionWebValida).WithMessage(ValidacionFoto.MensajeDireccionInvalida)
+                .MaximumLength(ValidacionFoto.LongitudMaxima).WithMessage(ValidacionFoto.MensajeLongitudMaxima)
+                .When(x => !string.IsNullOrWhiteSpace(x.Foto));
         }
     }
 }

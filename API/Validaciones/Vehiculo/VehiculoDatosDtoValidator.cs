@@ -18,12 +18,14 @@ namespace API.Validaciones.Vehiculo
                 .NotEmpty().WithMessage("El modelo es obligatorio.")
                 .MaximumLength(100).WithMessage("El modelo no puede superar los 100 caracteres.");
 
+            // Se detiene en la primera regla que falla. Antes un When al final condicionaba toda la
+            // cadena, también el NotEmpty, y un año vacío pasaba la validación.
             RuleFor(x => x.AnnoModelo)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage("El año del modelo es obligatorio.")
                 .Matches(@"^\d{4}$").WithMessage("El año debe tener 4 dígitos.")
                 .Must(a => int.TryParse(a, out var anno) && anno >= 1990 && anno <= DateTime.Today.Year + 1)
-                .WithMessage("El año del modelo no es válido.")
-                .When(x => !string.IsNullOrWhiteSpace(x.AnnoModelo));
+                .WithMessage("El año del modelo no es válido.");
 
             RuleFor(x => x.Tipo)
                 .NotEmpty().WithMessage("El tipo de vehículo es obligatorio.")

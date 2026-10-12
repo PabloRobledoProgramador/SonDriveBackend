@@ -8,6 +8,9 @@ namespace Biblioteca.Servicios.Interfaces
         Task<UsuarioDto> ObtenerPorIdAsync(long id, CancellationToken ct = default);
         Task<UsuarioDto> CrearAsync(UsuarioCrearDto dto, CancellationToken ct = default);
         Task<UsuarioDto> ActualizarAsync(long id, UsuarioActualizarDto dto, CancellationToken ct = default);
+
+        // Corrige nombre, apellido, correo, celular y foto de un conductor sin tocar estado, rol ni clave
+        Task<UsuarioDto> ActualizarConductorAsync(long id, ConductorActualizarDto dto, CancellationToken ct = default);
         Task CambiarClaveAsync(long id, UsuarioCambiarClaveDto dto, CancellationToken ct = default);
         Task CambiarEstadoAsync(long id, bool estado, CancellationToken ct = default);
         Task EliminarAsync(long id, CancellationToken ct = default);

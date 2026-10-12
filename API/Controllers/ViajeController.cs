@@ -39,6 +39,7 @@ namespace API.Controllers
             return Ok(viajes);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id:long}")]
         public async Task<ActionResult<ViajeResponseDTO>> ObtenerPorId(long id, CancellationToken ct)
         {

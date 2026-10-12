@@ -72,7 +72,10 @@ namespace Biblioteca.Servicios.Implementaciones
         {
             var existente = await ObtenerOFallarAsync(id, false, ct);
 
-            await ValidarConductorAsync(dto.IdUsuario, ct);
+            // Conservar al conductor actual no es una asignación nueva: solo se valida si cambia,
+            // para poder corregir los datos de un vehículo cuyo conductor quedó deshabilitado.
+            if (dto.IdUsuario != existente.IdUsuario)
+                await ValidarConductorAsync(dto.IdUsuario, ct);
 
             var placa = NormalizarPlaca(dto.Placa);
             if (await _repositorio.ExistePlacaAsync(placa, id, ct))
