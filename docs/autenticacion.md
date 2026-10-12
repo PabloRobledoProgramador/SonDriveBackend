@@ -383,9 +383,12 @@ Para recursos que no son el usuario (por ejemplo un vehículo), el controlador d
 | `PUT api/usuario/{id}/clave` | ✅ cualquiera | Solo la suya | ❌ 401 |
 | `PATCH api/usuario/{id}/estado` | ✅ | ❌ 403 | ❌ 401 |
 | `DELETE api/usuario/{id}` | ✅ | ❌ 403 | ❌ 401 |
-| Vehículos, viajes, ocupaciones, fallas, ciudades, rutas | ✅ | ✅ | ❌ 401 |
+| `PUT api/vehiculo/{id}` (editar un vehículo) | ✅ | ❌ 403, también sobre su propio vehículo | ❌ 401 |
+| Los demás endpoints de vehículos, y viajes, ocupaciones, fallas, ciudades, rutas | ✅ | ✅ | ❌ 401 |
 
 `PUT api/usuario/{id}/conductor` corrige nombre, apellido, correo, celular y foto de un conductor. No recibe ni cambia el estado, el rol ni la clave, y solo aplica a cuentas de rol **Conductor**: sobre un administrador responde `409`. Es el endpoint que usa el sitio para editar conductores; `PUT api/usuario/{id}` sigue existiendo, pero también cambia estado y rol.
+
+`PUT api/vehiculo/{id}` corrige los diez datos de un vehículo y permite reasignarlo a otro conductor. El conductor solo se comprueba (existe, tiene rol **Conductor** y está habilitado) cuando es distinto del que el vehículo ya tenía, así se pueden corregir los datos de un vehículo cuyo conductor fue deshabilitado. Un viaje no guarda a su conductor, lo toma de su vehículo: al reasignar un vehículo, sus viajes próximos pasan al nuevo conductor con sus puestos ocupados, y dejan de aparecer entre los viajes del anterior. El resto de los endpoints de vehículos (crear, eliminar, listar) todavía acepta cualquier token.
 
 Los permisos del rol **Conductor** sobre los demás módulos están pendientes de definir; por ahora solo necesita estar autenticado. Para restringirlos, aplique los ejemplos de la sección 7.
 

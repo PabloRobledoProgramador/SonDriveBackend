@@ -101,3 +101,46 @@ Content-Type: application/json
 }
 
 ###
+
+# 6. Editar datos de un vehículo (solo administradores). Se envían siempre los diez datos.
+#    200 con el vehículo actualizado: placa en mayúsculas y sin espacios, estado y días
+#    restantes recalculados. Con el token de un conductor responde 403, también sobre su
+#    propio vehículo. Si idUsuario cambia, el vehículo y sus viajes próximos pasan a ese conductor.
+PUT {{API_HostAddress}}/api/vehiculo/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "idUsuario": 2,
+  "placa": "abc 123",
+  "modelo": "Kia Rio",
+  "annoModelo": "2022",
+  "tipo": "Sedan",
+  "kilometraje": 49500,
+  "fechaUltimoServicio": "2026-09-20",
+  "vencimientoSoat": "2027-10-11",
+  "vencimientoTecnomecanica": "2027-06-30",
+  "vencimientoLicencia": "2029-03-05"
+}
+
+###
+
+# 6b. Datos inválidos: 400 ValidationProblemDetails con errores por campo (Placa, Modelo, Kilometraje)
+PUT {{API_HostAddress}}/api/vehiculo/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "idUsuario": 2,
+  "placa": "AB12",
+  "modelo": "",
+  "annoModelo": "2022",
+  "tipo": "Sedan",
+  "kilometraje": -5,
+  "fechaUltimoServicio": null,
+  "vencimientoSoat": "2027-10-11",
+  "vencimientoTecnomecanica": "2027-06-30",
+  "vencimientoLicencia": "2029-03-05"
+}
+
+###
