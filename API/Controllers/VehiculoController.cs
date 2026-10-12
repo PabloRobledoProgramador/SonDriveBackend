@@ -1,8 +1,10 @@
 ﻿using API.Seguridad;
 using Biblioteca.DTO.Vehiculo;
+using Biblioteca.Seguridad;
 using Biblioteca.Servicios.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -55,6 +57,8 @@ namespace API.Controllers
             return CreatedAtAction(nameof(ObtenerPorId), new { id = creado.Id }, creado);
         }
 
+        // PUT api/vehiculo/5: corrige los datos del vehículo y permite reasignarlo a otro conductor
+        [Authorize(Roles = Roles.Administrador)]
         [HttpPut("{id:long}")]
         public async Task<ActionResult<VehiculoResponseDTO>> Actualizar(long id, [FromBody] VehiculoDatosDTO dto, CancellationToken ct)
         {
